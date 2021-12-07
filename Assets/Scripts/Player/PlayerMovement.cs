@@ -12,6 +12,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Movement Variables")]
     [SerializeField] private float playerSpeed = 6.0f;
     [SerializeField] private float sprintSpeed = 8.0f;
+    [SerializeField] private float sprintDeadzone = 0.8f;
 
     [Header("Jump Variables")]
     [SerializeField] private float jumpHeight = 3.0f;
@@ -22,7 +23,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float xSensitivity = 2.0f;
     [SerializeField] private float ySensitivity = 2.0f;
     [SerializeField] private Vector2 yViewClamp;
-    [SerializeField] private float viewDeadzone = 2.0f;
+    [SerializeField] private float viewDeadzone = 0.1f;
 
     [Header("Wall run")]
     [SerializeField] private float wallRunGravity = 4.9f;
@@ -73,15 +74,7 @@ public class PlayerMovement : MonoBehaviour
     private void SetMovementInput(CallbackContext e) => this.moveInput = e.ReadValue<Vector2>();
     private void SetJumpInput(CallbackContext e) => this.timeSinceJump = 0f;
     private void SetSprintInput() => this.sprint = !this.sprint;
-    private void SetViewInput(CallbackContext e)
-    {
-        var view = e.ReadValue<Vector2>();
-
-        if (view.magnitude < this.viewDeadzone)
-            view = Vector2.zero;
-
-        this.viewInput = view;
-    }
+    private void SetViewInput(CallbackContext e) => this.viewInput = e.ReadValue<Vector2>();
 
     private void Update()
     {
@@ -119,7 +112,7 @@ public class PlayerMovement : MonoBehaviour
             this.timeSinceOnWall = 0f;
         }
 
-        if (this.moveInput.magnitude < 1)
+        if (this.moveInput.magnitude < this.sprintDeadzone)
             this.sprint = false;
 
         // Get basic speed from input
@@ -193,6 +186,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void SetView()
     {
+        if (this.viewInput.magnitude < this.viewDeadzone)
+            this.viewInput = Vector2.zero;
+
         this.cameraRotation.z = this.cameraTransform.rotation.eulerAngles.z;
 
         this.cameraRotation.x += -this.ySensitivity * viewInput.y * Time.deltaTime;
