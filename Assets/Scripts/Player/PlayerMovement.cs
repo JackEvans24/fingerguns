@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 using static UnityEngine.InputSystem.InputAction;
 
 [RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(PlayerController))]
 public class PlayerMovement : MonoBehaviour
 {
     [Header("References")]
@@ -33,7 +34,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private AnimationCurve wallJumpCurve;
 
     private CharacterController controller;
-    private PlayerActions input;
+    private PlayerController player;
 
     private Vector2 moveInput;
     private Vector2 viewInput;
@@ -50,7 +51,7 @@ public class PlayerMovement : MonoBehaviour
     private void Awake()
     {
         this.controller = GetComponent<CharacterController>();
-        this.SetInputEvents();
+        this.player = GetComponent<PlayerController>();
 
         this.playerRotation = this.transform.rotation.eulerAngles;
         this.cameraRotation = this.cameraTransform.rotation.eulerAngles;
@@ -58,20 +59,25 @@ public class PlayerMovement : MonoBehaviour
         this.ResetJumpTime();
     }
 
+    private void Start()
+    {
+        this.SetInputEvents();
+    }
+
     private void SetInputEvents()
     {
-        this.input = new PlayerActions();
+        var input = player.Input;
 
-        this.input.Movement.Move.performed += this.SetMovementInput;
-        this.input.Movement.Move.canceled += this.SetMovementInput;
-        this.input.Movement.View.performed += this.SetViewInput;
+        input.Movement.Move.performed += this.SetMovementInput;
+        input.Movement.Move.canceled += this.SetMovementInput;
+        input.Movement.View.performed += this.SetViewInput;
 
-        this.input.Movement.Jump.started += this.SetJumpInput;
-        this.input.Movement.Sprint.started += e => this.SetSprintInput();
+        input.Movement.Jump.started += this.SetJumpInput;
+        input.Movement.Sprint.started += e => this.SetSprintInput();
 
-        this.input.Movement.Pause.started += e => Pause.TogglePause();
+        input.Movement.Pause.started += e => Pause.TogglePause();
 
-        this.input.Enable();
+        input.Enable();
     }
 
     private void SetMovementInput(CallbackContext e) => this.moveInput = e.ReadValue<Vector2>();

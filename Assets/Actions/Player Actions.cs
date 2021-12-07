@@ -57,6 +57,22 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""Fire"",
+                    ""type"": ""Button"",
+                    ""id"": ""a03b9fec-5a56-4186-b203-6650c70b6b16"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""Zoom"",
+                    ""type"": ""Button"",
+                    ""id"": ""1fc58b9c-277e-4ea0-bf6d-a737d439e6c4"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -158,6 +174,28 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                     ""action"": ""Pause"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""455d8ef1-e03b-4255-b974-2f3738dc10d4"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KBM"",
+                    ""action"": ""Fire"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0d5606e8-6795-4db8-b561-291dae352f45"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Zoom"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -188,6 +226,8 @@ public class @PlayerActions : IInputActionCollection, IDisposable
         m_Movement_Jump = m_Movement.FindAction("Jump", throwIfNotFound: true);
         m_Movement_Sprint = m_Movement.FindAction("Sprint", throwIfNotFound: true);
         m_Movement_Pause = m_Movement.FindAction("Pause", throwIfNotFound: true);
+        m_Movement_Fire = m_Movement.FindAction("Fire", throwIfNotFound: true);
+        m_Movement_Zoom = m_Movement.FindAction("Zoom", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -242,6 +282,8 @@ public class @PlayerActions : IInputActionCollection, IDisposable
     private readonly InputAction m_Movement_Jump;
     private readonly InputAction m_Movement_Sprint;
     private readonly InputAction m_Movement_Pause;
+    private readonly InputAction m_Movement_Fire;
+    private readonly InputAction m_Movement_Zoom;
     public struct MovementActions
     {
         private @PlayerActions m_Wrapper;
@@ -251,6 +293,8 @@ public class @PlayerActions : IInputActionCollection, IDisposable
         public InputAction @Jump => m_Wrapper.m_Movement_Jump;
         public InputAction @Sprint => m_Wrapper.m_Movement_Sprint;
         public InputAction @Pause => m_Wrapper.m_Movement_Pause;
+        public InputAction @Fire => m_Wrapper.m_Movement_Fire;
+        public InputAction @Zoom => m_Wrapper.m_Movement_Zoom;
         public InputActionMap Get() { return m_Wrapper.m_Movement; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -275,6 +319,12 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                 @Pause.started -= m_Wrapper.m_MovementActionsCallbackInterface.OnPause;
                 @Pause.performed -= m_Wrapper.m_MovementActionsCallbackInterface.OnPause;
                 @Pause.canceled -= m_Wrapper.m_MovementActionsCallbackInterface.OnPause;
+                @Fire.started -= m_Wrapper.m_MovementActionsCallbackInterface.OnFire;
+                @Fire.performed -= m_Wrapper.m_MovementActionsCallbackInterface.OnFire;
+                @Fire.canceled -= m_Wrapper.m_MovementActionsCallbackInterface.OnFire;
+                @Zoom.started -= m_Wrapper.m_MovementActionsCallbackInterface.OnZoom;
+                @Zoom.performed -= m_Wrapper.m_MovementActionsCallbackInterface.OnZoom;
+                @Zoom.canceled -= m_Wrapper.m_MovementActionsCallbackInterface.OnZoom;
             }
             m_Wrapper.m_MovementActionsCallbackInterface = instance;
             if (instance != null)
@@ -294,6 +344,12 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                 @Pause.started += instance.OnPause;
                 @Pause.performed += instance.OnPause;
                 @Pause.canceled += instance.OnPause;
+                @Fire.started += instance.OnFire;
+                @Fire.performed += instance.OnFire;
+                @Fire.canceled += instance.OnFire;
+                @Zoom.started += instance.OnZoom;
+                @Zoom.performed += instance.OnZoom;
+                @Zoom.canceled += instance.OnZoom;
             }
         }
     }
@@ -314,5 +370,7 @@ public class @PlayerActions : IInputActionCollection, IDisposable
         void OnJump(InputAction.CallbackContext context);
         void OnSprint(InputAction.CallbackContext context);
         void OnPause(InputAction.CallbackContext context);
+        void OnFire(InputAction.CallbackContext context);
+        void OnZoom(InputAction.CallbackContext context);
     }
 }

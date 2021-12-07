@@ -7,6 +7,8 @@ public class Pause : MonoBehaviour
     private Pause instance;
     private static bool paused;
 
+    public static bool Paused { get => paused;  }
+
     private void Awake()
     {
         if (instance != null)
