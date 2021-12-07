@@ -23,7 +23,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("View Variables")]
     [SerializeField] private float xSensitivity = 2.0f;
     [SerializeField] private float ySensitivity = 2.0f;
-    [SerializeField] private float viewSmoothing = 0.02f;
+    [SerializeField] private float viewDeadzone = 2f;
     [SerializeField] private Vector2 yViewClamp;
 
     [Header("Wall run")]
@@ -38,8 +38,6 @@ public class PlayerMovement : MonoBehaviour
 
     private Vector2 moveInput;
     private Vector2 viewInput;
-    private Vector2 currentViewSpeed;
-    private Vector2 currentViewVelocity;
     private float timeSinceJump;
     private float timeSinceGrounded;
     private float timeSinceOnWall;
@@ -72,6 +70,7 @@ public class PlayerMovement : MonoBehaviour
 
         input.Movement.Move.performed += this.SetMovementInput;
         input.Movement.Move.canceled += this.SetMovementInput;
+        input.Movement.View.performed += this.SetViewInput;
 
         input.Movement.Jump.started += this.SetJumpInput;
         input.Movement.Sprint.started += e => this.SetSprintInput();
@@ -82,6 +81,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
     private void SetMovementInput(CallbackContext e) => this.moveInput = e.ReadValue<Vector2>();
+    private void SetViewInput(CallbackContext e) => this.viewInput = e.ReadValue<Vector2>();
     private void SetJumpInput(CallbackContext e) => this.timeSinceJump = 0f;
     private void SetSprintInput() => this.sprint = !this.sprint;
 
@@ -91,11 +91,6 @@ public class PlayerMovement : MonoBehaviour
 
         this.SetMovement();
         this.SetView();
-    }
-
-    private void FixedUpdate()
-    {
-        this.viewInput = player.Input.Movement.View.ReadValue<Vector2>();
     }
 
     private void UpdateTimeVariables()
@@ -200,16 +195,17 @@ public class PlayerMovement : MonoBehaviour
 
     private void SetView()
     {
+        if (this.viewInput.magnitude < this.viewDeadzone)
+            this.viewInput = Vector2.zero;
+
         this.cameraRotation.z = this.cameraTransform.rotation.eulerAngles.z;
 
-        this.currentViewSpeed = Vector2.SmoothDamp(this.currentViewSpeed, this.viewInput, ref this.currentViewVelocity, this.viewSmoothing);
-
-        this.cameraRotation.x += -this.ySensitivity * this.currentViewSpeed.y * Time.deltaTime;
+        this.cameraRotation.x += -this.ySensitivity * this.viewInput.y * Time.deltaTime;
         this.cameraRotation.x = Mathf.Clamp(this.cameraRotation.x, this.yViewClamp.x, this.yViewClamp.y);
 
         this.cameraTransform.localRotation = Quaternion.Euler(this.cameraRotation);
 
-        this.playerRotation.y += this.xSensitivity * this.currentViewSpeed.x * Time.deltaTime;
+        this.playerRotation.y += this.xSensitivity * this.viewInput.x * Time.deltaTime;
         this.transform.rotation = Quaternion.Euler(this.playerRotation);
     }
 }
