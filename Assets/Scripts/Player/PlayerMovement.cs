@@ -65,8 +65,11 @@ public class PlayerMovement : MonoBehaviour
         this.input.Movement.Move.performed += this.SetMovementInput;
         this.input.Movement.Move.canceled += this.SetMovementInput;
         this.input.Movement.View.performed += this.SetViewInput;
-        this.input.Movement.Jump.performed += this.SetJumpInput;
-        this.input.Movement.Sprint.performed += e => this.SetSprintInput();
+
+        this.input.Movement.Jump.started += this.SetJumpInput;
+        this.input.Movement.Sprint.started += e => this.SetSprintInput();
+
+        this.input.Movement.Pause.started += e => Pause.TogglePause();
 
         this.input.Enable();
     }
