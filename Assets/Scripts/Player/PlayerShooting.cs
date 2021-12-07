@@ -13,6 +13,7 @@ public class PlayerShooting : MonoBehaviour
     [Header("Shooting variables")]
     [SerializeField] private float fireDistance = 200f;
     [SerializeField] private float fireRate = 0.2f;
+    [SerializeField] private float damage = 10;
 
     [Header("Zoom varibles")]
     [SerializeField] private float unzoomedFOV;
@@ -80,6 +81,12 @@ public class PlayerShooting : MonoBehaviour
 
         var marker = Instantiate(hitMarker, hit.point, hitMarker.transform.rotation);
         Destroy(marker, this.markerLifeTime);
+
+        var health = hit.collider.gameObject.GetComponent<HealthCollider>();
+        if (health == null)
+            return;
+
+        health.TakeDamage(this.damage);
     }
 
     private void Zoom(CallbackContext e)
