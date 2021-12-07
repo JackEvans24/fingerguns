@@ -30,3 +30,19 @@ public class Raycaster : MonoBehaviour
         Gizmos.DrawLine(origin, destination);
     }
 }
+
+public static class RaycasterExtensions
+{
+    public static Vector3 AggregateNormals(this IEnumerable<Raycaster> checks)
+    {
+        var result = Vector3.zero;
+
+        foreach (var check in checks)
+        {
+            if (check.HasHit)
+                result += check.Hit.normal;
+        }
+
+        return result;
+    }
+}

@@ -87,25 +87,32 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        if (this.timeSinceGrounded <= this.jumpTimeAllowance)
-            this.timeSinceGrounded += Time.deltaTime;
-        if (this.timeSinceJump <= this.jumpTimeAllowance)
-            this.timeSinceJump += Time.deltaTime;
-        if (this.timeSinceOnWall <= this.jumpTimeAllowance)
-            this.timeSinceOnWall += Time.deltaTime;
-        if (this.currentWallJumpTime <= this.wallJumpTime)
-            this.currentWallJumpTime += Time.deltaTime;
+        this.UpdateTimeVariables();
 
         this.SetMovement();
         this.SetView();
     }
 
+    private void UpdateTimeVariables()
+    {
+        TimedVariables.UpdateTimeVariable(ref timeSinceGrounded, jumpTimeAllowance);
+        TimedVariables.UpdateTimeVariable(ref timeSinceJump, jumpTimeAllowance);
+        TimedVariables.UpdateTimeVariable(ref timeSinceOnWall, jumpTimeAllowance);
+        TimedVariables.UpdateTimeVariable(ref currentWallJumpTime, wallJumpTime);
+    }
+
     private void SetMovement()
     {
+        // Check if grounded
         var grounded = this.controller.isGrounded;
         if (grounded)
             this.timeSinceGrounded = 0f;
 
+        // Zero vertical velocity if grounded
+        if (grounded && this.playerVelocity.y < 0)
+            this.playerVelocity.y = 0f;
+
+        // Check if wall running
         var wallRunning = this.wallRunChecks.Any(c => c.HasHit);
         var wallNormal = Vector3.zero;
         if(wallRunning)
@@ -114,20 +121,20 @@ public class PlayerMovement : MonoBehaviour
             this.timeSinceOnWall = 0f;
         }
 
-        if (grounded && this.playerVelocity.y < 0)
-            this.playerVelocity.y = 0f;
-
+        // Get basic speed from input
         var speed = this.sprint ? this.sprintSpeed : this.playerSpeed;
         var move = new Vector3(this.moveInput.x * speed, this.playerVelocity.y, this.moveInput.y * speed);
         var up = 0f;
 
         if (this.timeSinceJump <= this.jumpTimeAllowance)
         {
+            // Add jump force if jumping
             if (this.timeSinceGrounded <= this.jumpTimeAllowance)
             {
                 up = Mathf.Sqrt(Mathf.Abs(this.jumpHeight * this.gravityValue));
                 this.ResetJumpTime();
             }
+            // Set wall jump force if jumping
             else if (this.timeSinceOnWall <= this.jumpTimeAllowance)
             {
                 this.wallJumpVelocity = wallNormal * this.wallJumpForce.x;
@@ -141,30 +148,26 @@ public class PlayerMovement : MonoBehaviour
 
         this.playerVelocity = this.transform.TransformVector(move);
 
+        // Add wall jump force if jumping from wall
         if (this.currentWallJumpTime <= this.wallJumpTime)
             AddWallJumpVelocity();
 
+        // Set vertical if jumping
         if (up > 0f)
             this.playerVelocity.y = up;
 
+        // Add gravity
         var gravity = wallRunning ? this.wallRunGravity : this.gravityValue;
         this.playerVelocity.y += gravity * Time.deltaTime;
 
+        // Move
         this.controller.Move(this.playerVelocity * Time.deltaTime);
     }
 
     private Vector3 GetWallNormal()
     {
-        var result = Vector3.zero;
-
-        foreach (var check in this.wallRunChecks)
-        {
-            if (check.HasHit)
-                result += check.Hit.normal;
-        }
-
+        var result = this.wallRunChecks.AggregateNormals();
         Debug.DrawLine(this.transform.position, this.transform.position + result * 5, Color.red);
-
         return result;
     }
 
@@ -189,10 +192,12 @@ public class PlayerMovement : MonoBehaviour
 
     private void SetView()
     {
+        this.cameraRotation.z = this.cameraTransform.rotation.eulerAngles.z;
+
         this.cameraRotation.x += -this.ySensitivity * viewInput.y * Time.deltaTime;
         this.cameraRotation.x = Mathf.Clamp(this.cameraRotation.x, this.yViewClamp.x, this.yViewClamp.y);
 
-        cameraTransform.localRotation = Quaternion.Euler(this.cameraRotation);
+        this.cameraTransform.localRotation = Quaternion.Euler(this.cameraRotation);
 
         this.playerRotation.y += this.xSensitivity * viewInput.x * Time.deltaTime;
         this.transform.rotation = Quaternion.Euler(this.playerRotation);
