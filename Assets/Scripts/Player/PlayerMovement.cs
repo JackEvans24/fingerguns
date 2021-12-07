@@ -16,7 +16,6 @@ public class PlayerMovement : MonoBehaviour
     [Header("Jump Variables")]
     [SerializeField] private float jumpHeight = 3.0f;
     [SerializeField] private float jumpTimeAllowance = 0.2f;
-    [SerializeField] private float jumpDeadzone = 0.1f;
     [SerializeField] private float gravityValue = -9.81f;
 
     [Header("View Variables")]
@@ -66,15 +65,14 @@ public class PlayerMovement : MonoBehaviour
         this.input.Movement.Move.canceled += this.SetMovementInput;
         this.input.Movement.View.performed += this.SetViewInput;
         this.input.Movement.Jump.performed += this.SetJumpInput;
-        this.input.Movement.Sprint.performed += e => this.SetSprintInput(true);
-        this.input.Movement.Sprint.canceled += e => this.SetSprintInput(false);
+        this.input.Movement.Sprint.performed += e => this.SetSprintInput();
 
         this.input.Enable();
     }
 
     private void SetMovementInput(CallbackContext e) => this.moveInput = e.ReadValue<Vector2>();
     private void SetJumpInput(CallbackContext e) => this.timeSinceJump = 0f;
-    private void SetSprintInput(bool sprint) => this.sprint = sprint;
+    private void SetSprintInput() => this.sprint = !this.sprint;
     private void SetViewInput(CallbackContext e)
     {
         var view = e.ReadValue<Vector2>();
@@ -120,6 +118,9 @@ public class PlayerMovement : MonoBehaviour
             wallNormal = this.GetWallNormal();
             this.timeSinceOnWall = 0f;
         }
+
+        if (this.moveInput.magnitude < 1)
+            this.sprint = false;
 
         // Get basic speed from input
         var speed = this.sprint ? this.sprintSpeed : this.playerSpeed;
