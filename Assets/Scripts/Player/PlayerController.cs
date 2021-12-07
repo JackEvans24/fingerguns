@@ -11,4 +11,9 @@ public class PlayerController : MonoBehaviour
     {
         input = new PlayerActions();
     }
+
+    public void Die()
+    {
+        input.Disable();
+    }
 }
