@@ -1,3 +1,4 @@
+using Photon.Pun;
 using UnityEngine;
 using static UnityEngine.InputSystem.InputAction;
 
@@ -20,9 +21,6 @@ public class PlayerShooting : MonoBehaviour
     [SerializeField] private float zoomedFOV;
     [SerializeField] private float zoomSmoothing;
 
-    [Header("Marker variables")]
-    [SerializeField] private float markerLifeTime = 0.2f;
-
     private PlayerController player;
 
     private float timeSinceFire;
@@ -40,6 +38,9 @@ public class PlayerShooting : MonoBehaviour
 
     private void Start()
     {
+        if (!player.View.IsMine)
+            return;
+
         this.SetInputEvents();
     }
 
@@ -57,6 +58,9 @@ public class PlayerShooting : MonoBehaviour
 
     private void Update()
     {
+        if (!player.View.IsMine)
+            return;
+
         TimedVariables.UpdateTimeVariable(ref this.timeSinceFire, this.fireRate);
 
         this.mainCamera.fieldOfView = Mathf.SmoothDamp(this.mainCamera.fieldOfView, targetFov, ref this.currentZoomSmoothVelocity, this.zoomSmoothing);
@@ -79,8 +83,7 @@ public class PlayerShooting : MonoBehaviour
         if (!Physics.Raycast(this.firePoint.position, this.firePoint.forward, out var hit, this.fireDistance))
             return;
 
-        var marker = Instantiate(hitMarker, hit.point, hitMarker.transform.rotation);
-        Destroy(marker, this.markerLifeTime);
+        var marker = PhotonNetwork.Instantiate(hitMarker.name, hit.point, hitMarker.transform.rotation);
 
         var health = hit.collider.gameObject.GetComponent<HealthCollider>();
         if (health == null)

@@ -61,6 +61,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void Start()
     {
+        if (!player.View.IsMine)
+            return;
+
         this.SetInputEvents();
     }
 
@@ -87,6 +90,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+        if (!player.View.IsMine)
+            return;
+
         this.UpdateTimeVariables();
 
         this.SetMovement();
