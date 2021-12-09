@@ -93,6 +93,9 @@ public class PlayerMovement : MonoBehaviour
         if (!player.View.IsMine)
             return;
 
+        if (Pause.Paused)
+            return;
+
         this.UpdateTimeVariables();
 
         this.SetMovement();
