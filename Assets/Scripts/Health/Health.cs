@@ -1,15 +1,19 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Health : MonoBehaviour
 {
+    [Header("References")]
     [SerializeField] private PlayerController player;
-    [SerializeField] private int maxHealth;
+    [SerializeField] private HealthBar healthBar;
 
-    private int currentHealth;
+    [Header("Health Values")]
+    public int MaxHealth;
+    public int CurrentHealth;
 
-    public bool Dead { get => this.currentHealth <= 0; }
+    public bool Dead { get => this.CurrentHealth <= 0; }
 
     private void Awake()
     {
@@ -18,17 +22,32 @@ public class Health : MonoBehaviour
 
     public void ResetHealth()
     {
-        this.currentHealth = this.maxHealth;      
+        if (!player.View.IsMine)
+            return;
+
+        this.CurrentHealth = this.MaxHealth;
+        this.healthBar.ResetHealth(this); 
     }
 
     public void TakeDamage(float damage)
     {
-        if (currentHealth <= 0)
+        player.View.RPC(nameof(this.RPC_TakeDamage), RpcTarget.All, damage);
+    }
+
+    [PunRPC]
+    void RPC_TakeDamage(float damage)
+    {
+        if (!player.View.IsMine)
+            return;
+        if (this.CurrentHealth <= 0)
             return;
 
-        currentHealth = Mathf.Max(0, (int)Mathf.Ceil(currentHealth - damage));
+        this.CurrentHealth = Mathf.Max(0, (int)Mathf.Ceil(this.CurrentHealth - damage));
+        this.healthBar.UpdateHealth(this);
 
-        if (currentHealth <= 0)
+        Debug.Log($"I have {this.CurrentHealth} health");
+
+        if (this.CurrentHealth <= 0)
             this.Die();
     }
 

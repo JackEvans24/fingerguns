@@ -9,7 +9,6 @@ public class PlayerShooting : MonoBehaviour
     [SerializeField] private Camera mainCamera;
     [SerializeField] private Transform firePoint;
     [SerializeField] private Animator[] handAnimators;
-    [SerializeField] private GameObject hitMarker;
 
     [Header("Shooting variables")]
     [SerializeField] private float fireDistance = 200f;
@@ -83,13 +82,9 @@ public class PlayerShooting : MonoBehaviour
         if (!Physics.Raycast(this.firePoint.position, this.firePoint.forward, out var hit, this.fireDistance))
             return;
 
-        var marker = PhotonNetwork.Instantiate(hitMarker.name, hit.point, hitMarker.transform.rotation);
-
-        var health = hit.collider.gameObject.GetComponent<HealthCollider>();
-        if (health == null)
-            return;
-
-        health.TakeDamage(this.damage);
+        var health = hit.collider.GetComponent<HealthCollider>();
+        if (health != null)
+            health.TakeDamage(this.damage);
     }
 
     private void Zoom(CallbackContext e)
