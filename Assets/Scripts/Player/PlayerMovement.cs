@@ -94,7 +94,11 @@ public class PlayerMovement : MonoBehaviour
             return;
 
         if (Pause.Paused)
-            return;
+        {
+            this.moveInput = Vector2.zero;
+            this.viewInput = Vector2.zero;
+            this.ResetJumpTime();
+        }
 
         this.UpdateTimeVariables();
 
