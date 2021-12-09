@@ -27,12 +27,10 @@ public class Pause : MonoBehaviour
         if (paused)
         {
             Cursor.lockState = CursorLockMode.Locked;
-            Time.timeScale = 1f;
         }
         else
         {
             Cursor.lockState = CursorLockMode.None;
-            Time.timeScale = 0f;
         }
 
         paused = !paused;
