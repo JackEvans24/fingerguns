@@ -8,6 +8,7 @@ public class Health : MonoBehaviour
     [Header("References")]
     [SerializeField] private PlayerController player;
     [SerializeField] private HealthBar healthBar;
+    [SerializeField] private ParticleSystem hurtParticles;
 
     [Header("Health Values")]
     public int MaxHealth;
@@ -37,6 +38,8 @@ public class Health : MonoBehaviour
     [PunRPC]
     void RPC_TakeDamage(float damage)
     {
+        this.hurtParticles.Play();
+
         if (!player.View.IsMine)
             return;
         if (this.CurrentHealth <= 0)
@@ -44,8 +47,6 @@ public class Health : MonoBehaviour
 
         this.CurrentHealth = Mathf.Max(0, (int)Mathf.Ceil(this.CurrentHealth - damage));
         this.healthBar.UpdateHealth(this);
-
-        Debug.Log($"I have {this.CurrentHealth} health");
 
         if (this.CurrentHealth <= 0)
             this.Die();
