@@ -48,31 +48,28 @@ public class PlayerController : MonoBehaviour
 
     public void Die()
     {
-        playerManager.Die();
+        input.Disable();
 
-        //input.Disable();
+        view.RPC(nameof(this.RPC_Die), RpcTarget.All);
 
-        //body.enabled = false;
-        //foreach (var hand in hands)
-        //    hand.enabled = false;
+        StartCoroutine(this.ResetAfterInterval());
+    }
 
-        //foreach (var particles in this.deathParticles)
-        //    particles.Play();
+    [PunRPC]
+    private void RPC_Die()
+    {
+        body.enabled = false;
+        foreach (var hand in hands)
+            hand.enabled = false;
 
-        //StartCoroutine(this.ResetAfterInterval());
+        foreach (var particles in this.deathParticles)
+            particles.Play();
     }
 
     private IEnumerator ResetAfterInterval()
     {
         yield return new WaitForSeconds(this.resetInterval);
 
-        this.transform.position = Vector3.zero;
-
-        body.enabled = true;
-        foreach (var hand in hands)
-            hand.enabled = true;
-
-        this.health.ResetHealth();
-        this.input.Enable();
+        playerManager.Die();
     }
 }

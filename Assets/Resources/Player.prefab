@@ -239,7 +239,6 @@ GameObject:
   - component: {fileID: 191366614975858781}
   - component: {fileID: 7684651594273902039}
   - component: {fileID: 5708662103247898613}
-  - component: {fileID: 1952786110762289231}
   m_Layer: 7
   m_Name: Hands
   m_TagString: Untagged
@@ -5091,28 +5090,6 @@ ParticleSystemRenderer:
   m_Mesh2: {fileID: 0}
   m_Mesh3: {fileID: 0}
   m_MaskInteraction: 0
---- !u!114 &1952786110762289231
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2903753280524459023}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ObservedComponentsFoldoutOpen: 1
-  Group: 0
-  prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 0
-  observableSearch: 2
-  ObservedComponents: []
-  sceneViewId: 0
-  InstantiationId: 0
-  isRuntimeInstantiated: 0
 --- !u!1 &3072447339510382967
 GameObject:
   m_ObjectHideFlags: 0
@@ -6756,7 +6733,6 @@ GameObject:
   - component: {fileID: 2329342970576808771}
   - component: {fileID: 4401113836202315984}
   - component: {fileID: 9035670962734073986}
-  - component: {fileID: 9003730345409284374}
   m_Layer: 7
   m_Name: Blood
   m_TagString: Untagged
@@ -11608,28 +11584,6 @@ ParticleSystemRenderer:
   m_Mesh2: {fileID: 0}
   m_Mesh3: {fileID: 0}
   m_MaskInteraction: 0
---- !u!114 &9003730345409284374
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8407390717910384490}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ObservedComponentsFoldoutOpen: 1
-  Group: 0
-  prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 0
-  observableSearch: 2
-  ObservedComponents: []
-  sceneViewId: 0
-  InstantiationId: 0
-  isRuntimeInstantiated: 0
 --- !u!1 &8452287665877702077
 GameObject:
   m_ObjectHideFlags: 0
@@ -11927,6 +11881,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dc6fb64e69df6ef498f87ca1f57015d6, type: 3}
+--- !u!1 &4774869410533275409 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: dc6fb64e69df6ef498f87ca1f57015d6, type: 3}
+  m_PrefabInstance: {fileID: 5657321300821789248}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5262577946988031403 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: dc6fb64e69df6ef498f87ca1f57015d6, type: 3}
@@ -11935,10 +11894,5 @@ Transform:
 --- !u!137 &4202612927478878174 stripped
 SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: 8417361359673230750, guid: dc6fb64e69df6ef498f87ca1f57015d6, type: 3}
-  m_PrefabInstance: {fileID: 5657321300821789248}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &4774869410533275409 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: dc6fb64e69df6ef498f87ca1f57015d6, type: 3}
   m_PrefabInstance: {fileID: 5657321300821789248}
   m_PrefabAsset: {fileID: 0}
