@@ -10,8 +10,6 @@ public class PlayerManager : MonoBehaviour
     private PhotonView photonView;
     private GameObject player;
 
-    private static int currentSpawnPointIndex;
-
     private void Awake()
     {
         photonView = GetComponent<PhotonView>();
@@ -24,12 +22,9 @@ public class PlayerManager : MonoBehaviour
 
     private void CreatePlayer()
     {
-        var spawnPoint = this.spawnPoints[currentSpawnPointIndex];
+        var spawnPoint = this.spawnPoints[Random.Range(0, spawnPoints.Length)];
         this.player = PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint.position, Quaternion.identity, data: new object[] { photonView.ViewID });
 
-        currentSpawnPointIndex++;
-        if (currentSpawnPointIndex >= this.spawnPoints.Length)
-            currentSpawnPointIndex = 0;
     }
 
     public void Die()
