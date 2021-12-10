@@ -1,7 +1,6 @@
+using DG.Tweening;
 using Photon.Pun;
-using Photon.Realtime;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Health))]
@@ -28,6 +27,9 @@ public class PlayerController : MonoBehaviour
     [Header("Death")]
     [SerializeField] private ParticleSystem[] deathParticles;
     [SerializeField] private float resetInterval;
+    [SerializeField] private Vector3 deathCameraPosition;
+    [SerializeField] private Vector3 deathCameraRotation;
+    [SerializeField] private float cameraZoomInterval;
 
     private void Awake()
     {
@@ -69,6 +71,9 @@ public class PlayerController : MonoBehaviour
 
         foreach (var particles in this.deathParticles)
             particles.Play();
+
+        this.cam.transform.DOLocalMove(this.deathCameraPosition, this.cameraZoomInterval).SetEase(Ease.OutSine);
+        this.cam.transform.DOLocalRotate(this.deathCameraRotation, this.cameraZoomInterval).SetEase(Ease.OutSine);
     }
 
     private IEnumerator ResetAfterInterval()
