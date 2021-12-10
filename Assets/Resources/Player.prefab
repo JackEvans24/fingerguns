@@ -333,7 +333,7 @@ ParticleSystem:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-  moveWithTransform: 0
+  moveWithTransform: 1
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
   randomSeed: 0
@@ -6135,7 +6135,6 @@ MonoBehaviour:
   - {fileID: 4202612925751345021}
   - {fileID: 4202612927478878174}
   deathParticles:
-  - {fileID: 4401113836202315984}
   - {fileID: 7684651594273902039}
   resetInterval: 3
 --- !u!114 &5657321301239029159
@@ -6828,7 +6827,7 @@ ParticleSystem:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-  moveWithTransform: 0
+  moveWithTransform: 1
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
   randomSeed: 0
