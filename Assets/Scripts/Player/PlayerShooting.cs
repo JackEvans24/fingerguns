@@ -84,7 +84,7 @@ public class PlayerShooting : MonoBehaviour
 
         var health = hit.collider.GetComponent<HealthCollider>();
         if (health != null)
-            health.TakeDamage(this.damage);
+            health.TakeDamage(this.damage, this.transform);
     }
 
     private void Zoom(CallbackContext e)

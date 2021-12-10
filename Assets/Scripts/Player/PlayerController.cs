@@ -23,6 +23,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Camera cam;
     [SerializeField] private MeshRenderer body;
     [SerializeField] private SkinnedMeshRenderer[] hands;
+    [SerializeField] private Collider[] colliders;
 
     [Header("Death")]
     [SerializeField] private ParticleSystem[] deathParticles;
@@ -59,6 +60,9 @@ public class PlayerController : MonoBehaviour
     [PunRPC]
     private void RPC_Die()
     {
+        foreach (var collider in this.colliders)
+            collider.enabled = false;
+
         body.enabled = false;
         foreach (var hand in hands)
             hand.enabled = false;

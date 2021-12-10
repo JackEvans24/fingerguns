@@ -1,6 +1,4 @@
 using Photon.Pun;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Health : MonoBehaviour
@@ -9,6 +7,7 @@ public class Health : MonoBehaviour
     [SerializeField] private PlayerController player;
     [SerializeField] private HealthBar healthBar;
     [SerializeField] private ParticleSystem hurtParticles;
+    [SerializeField] private HitIndicator indicator;
 
     [Header("Health Values")]
     public int MaxHealth;
@@ -30,13 +29,13 @@ public class Health : MonoBehaviour
         this.healthBar.ResetHealth(this); 
     }
 
-    public void TakeDamage(float damage)
+    public void TakeDamage(float damage, Transform damagedBy)
     {
-        player.View.RPC(nameof(this.RPC_TakeDamage), RpcTarget.All, damage);
+        player.View.RPC(nameof(this.RPC_TakeDamage), RpcTarget.All, damage, damagedBy.position);
     }
 
     [PunRPC]
-    void RPC_TakeDamage(float damage)
+    void RPC_TakeDamage(float damage, Vector3 damagedFrom)
     {
         this.hurtParticles.Play();
 
@@ -44,6 +43,8 @@ public class Health : MonoBehaviour
             return;
         if (this.CurrentHealth <= 0)
             return;
+
+        this.indicator.ShowHitFrom(damagedFrom);
 
         this.CurrentHealth = Mathf.Max(0, (int)Mathf.Ceil(this.CurrentHealth - damage));
         this.healthBar.UpdateHealth(this);
