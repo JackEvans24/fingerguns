@@ -21,8 +21,6 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float gravityValue = -9.81f;
 
     [Header("View Variables")]
-    [SerializeField] private float xSensitivity = 2.0f;
-    [SerializeField] private float ySensitivity = 2.0f;
     [SerializeField] private float viewDeadzone = 2f;
     [SerializeField] private Vector2 yViewClamp;
 
@@ -36,6 +34,7 @@ public class PlayerMovement : MonoBehaviour
     private CharacterController controller;
     private PlayerController player;
 
+    private int sensitivity;
     private Vector2 moveInput;
     private Vector2 viewInput;
     private float timeSinceJump;
@@ -64,11 +63,14 @@ public class PlayerMovement : MonoBehaviour
         if (!player.View.IsMine)
             return;
 
-        this.SetInputEvents();
+        this.SetEvents();
+        this.UpdateSettings(this, null);
     }
 
-    private void SetInputEvents()
+    private void SetEvents()
     {
+        SettingsManager.OnSettingsChanged += this.UpdateSettings;
+
         var input = player.Input;
 
         input.Movement.Move.performed += this.SetMovementInput;
@@ -77,17 +79,35 @@ public class PlayerMovement : MonoBehaviour
         input.Movement.View.canceled += this.SetViewInput;
 
         input.Movement.Jump.started += this.SetJumpInput;
-        input.Movement.Sprint.started += e => this.SetSprintInput();
+        input.Movement.Sprint.started += this.SetSprintInput;
 
-        input.Movement.Pause.started += e => Pause.TogglePause();
+        this.player.OnRemoveInputs += (_s, _e) => this.RemoveEvents();
+    }
 
-        input.Enable();
+    private void RemoveEvents()
+    {
+        SettingsManager.OnSettingsChanged -= this.UpdateSettings;
+
+        var input = player.Input;
+
+        input.Movement.Move.performed -= this.SetMovementInput;
+        input.Movement.Move.canceled -= this.SetMovementInput;
+        input.Movement.View.performed -= this.SetViewInput;
+        input.Movement.View.canceled -= this.SetViewInput;
+
+        input.Movement.Jump.started -= this.SetJumpInput;
+        input.Movement.Sprint.started -= this.SetSprintInput;
     }
 
     private void SetMovementInput(CallbackContext e) => this.moveInput = e.ReadValue<Vector2>();
     private void SetViewInput(CallbackContext e) => this.viewInput = e.ReadValue<Vector2>() * 0.01f;
     private void SetJumpInput(CallbackContext e) => this.timeSinceJump = 0f;
-    private void SetSprintInput() => this.sprint = !this.sprint;
+    private void SetSprintInput(CallbackContext e) => this.sprint = !this.sprint;
+
+    private void UpdateSettings(object sender, System.EventArgs e)
+    {
+        this.sensitivity = SettingsManager.Sensitivity;
+    }
 
     private void Update()
     {
@@ -211,12 +231,12 @@ public class PlayerMovement : MonoBehaviour
     {
         this.cameraRotation.z = this.cameraTransform.rotation.eulerAngles.z;
 
-        this.cameraRotation.x += -this.ySensitivity * this.viewInput.y;
+        this.cameraRotation.x += -this.sensitivity * this.viewInput.y;
         this.cameraRotation.x = Mathf.Clamp(this.cameraRotation.x, this.yViewClamp.x, this.yViewClamp.y);
 
         this.cameraTransform.localRotation = Quaternion.Euler(this.cameraRotation);
 
-        this.playerRotation.y += this.xSensitivity * this.viewInput.x;
+        this.playerRotation.y += this.sensitivity * this.viewInput.x;
         this.transform.rotation = Quaternion.Euler(this.playerRotation);
     }
 }

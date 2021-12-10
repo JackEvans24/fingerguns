@@ -1,7 +1,9 @@
 using DG.Tweening;
 using Photon.Pun;
+using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Health))]
 [RequireComponent(typeof(PhotonView))]
@@ -24,12 +26,17 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private SkinnedMeshRenderer[] hands;
     [SerializeField] private Collider[] colliders;
 
+    [Header("Pause")]
+    [SerializeField] private CanvasGroup pauseCanvas;
+
     [Header("Death")]
     [SerializeField] private ParticleSystem[] deathParticles;
     [SerializeField] private float resetInterval;
     [SerializeField] private Vector3 deathCameraPosition;
     [SerializeField] private Vector3 deathCameraRotation;
     [SerializeField] private float cameraZoomInterval;
+
+    public event EventHandler OnRemoveInputs;
 
     private void Awake()
     {
@@ -47,7 +54,31 @@ public class PlayerController : MonoBehaviour
         {
             this.cam.enabled = true;
             this.cam.gameObject.AddComponent<AudioListener>();
+
+            input.Movement.Pause.started += this.TogglePause_Event;
+            this.input.Enable();
         }
+    }
+
+    public void TogglePause_Event(InputAction.CallbackContext _e) => this.TogglePause();
+
+    public void TogglePause()
+    {
+        Pause.TogglePause();
+
+        this.pauseCanvas.interactable = Pause.Paused;
+        this.pauseCanvas.alpha = Pause.Paused ? 1 : 0;
+
+    }
+
+    public void QuitGame()
+    {
+        this.OnRemoveInputs?.Invoke(this, null);
+        this.input.Movement.Pause.started -= this.TogglePause_Event;
+
+        Pause.LeaveGame();
+
+        this.playerManager.Leave();
     }
 
     public void Die()

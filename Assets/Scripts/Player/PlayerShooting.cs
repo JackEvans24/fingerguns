@@ -47,12 +47,22 @@ public class PlayerShooting : MonoBehaviour
     {
         var input = player.Input;
 
-        input.Movement.Fire.started += e => this.Fire();
+        input.Movement.Fire.started += this.Fire;
 
         input.Movement.Zoom.performed += this.Zoom;
         input.Movement.Zoom.canceled += this.Zoom;
 
-        input.Enable();
+        this.player.OnRemoveInputs += (_s, _e) => this.RemoveInputEvents();
+    }
+
+    private void RemoveInputEvents()
+    {
+        var input = player.Input;
+
+        input.Movement.Fire.started -= this.Fire;
+
+        input.Movement.Zoom.performed -= this.Zoom;
+        input.Movement.Zoom.canceled -= this.Zoom;
     }
 
     private void Update()
@@ -65,7 +75,7 @@ public class PlayerShooting : MonoBehaviour
         this.mainCamera.fieldOfView = Mathf.SmoothDamp(this.mainCamera.fieldOfView, targetFov, ref this.currentZoomSmoothVelocity, this.zoomSmoothing);
     }
 
-    private void Fire()
+    private void Fire(CallbackContext e)
     {
         if (Pause.Paused || this.player.Health.Dead)
             return;

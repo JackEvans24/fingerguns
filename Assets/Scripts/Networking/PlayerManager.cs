@@ -2,7 +2,7 @@ using Photon.Pun;
 using UnityEngine;
 
 [RequireComponent(typeof(PhotonView))]
-public class PlayerManager : MonoBehaviour
+public class PlayerManager : MonoBehaviourPunCallbacks
 {
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private Transform[] spawnPoints;
@@ -17,6 +17,7 @@ public class PlayerManager : MonoBehaviour
 
     private void Start()
     {
+        Cursor.lockState = CursorLockMode.Locked;
         CreatePlayer();
     }
 
@@ -31,5 +32,16 @@ public class PlayerManager : MonoBehaviour
     {
         PhotonNetwork.Destroy(this.player);
         this.CreatePlayer();
+    }
+
+    public void Leave()
+    {
+        PhotonNetwork.Destroy(this.player);
+        PhotonNetwork.LeaveRoom();
+    }
+
+    public override void OnLeftRoom()
+    {
+        PhotonNetwork.LoadLevel("Lobby");
     }
 }

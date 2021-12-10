@@ -35,4 +35,10 @@ public class Pause : MonoBehaviour
 
         paused = !paused;
     }
+
+    public static void LeaveGame()
+    {
+        Cursor.lockState = CursorLockMode.None;
+        paused = false;
+    }
 }
