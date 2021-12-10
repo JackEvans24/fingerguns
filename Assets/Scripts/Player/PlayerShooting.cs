@@ -57,7 +57,7 @@ public class PlayerShooting : MonoBehaviour
 
     private void Update()
     {
-        if (!player.View.IsMine)
+        if (!player.View.IsMine || this.player.Health.Dead)
             return;
 
         TimedVariables.UpdateTimeVariable(ref this.timeSinceFire, this.fireRate);
@@ -67,7 +67,7 @@ public class PlayerShooting : MonoBehaviour
 
     private void Fire()
     {
-        if (Pause.Paused)
+        if (Pause.Paused || this.player.Health.Dead)
             return;
 
         if (this.timeSinceFire < this.fireRate)
@@ -89,7 +89,7 @@ public class PlayerShooting : MonoBehaviour
 
     private void Zoom(CallbackContext e)
     {
-        if (Pause.Paused)
+        if (Pause.Paused || this.player.Health.Dead)
             return;
 
         this.targetFov = e.ReadValueAsButton() ? this.zoomedFOV : this.unzoomedFOV;

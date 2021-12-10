@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour
     private PlayerManager playerManager;
 
     private Health health;
+    public Health Health { get => this.health; }
 
     [Header("References")]
     [SerializeField] private Camera cam;

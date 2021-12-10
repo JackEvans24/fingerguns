@@ -93,7 +93,7 @@ public class PlayerMovement : MonoBehaviour
         if (!player.View.IsMine)
             return;
 
-        if (Pause.Paused)
+        if (Pause.Paused || this.player.Health.Dead)
         {
             this.moveInput = Vector2.zero;
             this.viewInput = Vector2.zero;
