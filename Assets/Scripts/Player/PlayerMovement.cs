@@ -74,6 +74,7 @@ public class PlayerMovement : MonoBehaviour
         input.Movement.Move.performed += this.SetMovementInput;
         input.Movement.Move.canceled += this.SetMovementInput;
         input.Movement.View.performed += this.SetViewInput;
+        input.Movement.View.canceled += this.SetViewInput;
 
         input.Movement.Jump.started += this.SetJumpInput;
         input.Movement.Sprint.started += e => this.SetSprintInput();
@@ -84,7 +85,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
     private void SetMovementInput(CallbackContext e) => this.moveInput = e.ReadValue<Vector2>();
-    private void SetViewInput(CallbackContext e) => this.viewInput = e.ReadValue<Vector2>();
+    private void SetViewInput(CallbackContext e) => this.viewInput = e.ReadValue<Vector2>() * 0.01f;
     private void SetJumpInput(CallbackContext e) => this.timeSinceJump = 0f;
     private void SetSprintInput() => this.sprint = !this.sprint;
 
@@ -208,17 +209,14 @@ public class PlayerMovement : MonoBehaviour
 
     private void SetView()
     {
-        if (this.viewInput.magnitude < this.viewDeadzone)
-            this.viewInput = Vector2.zero;
-
         this.cameraRotation.z = this.cameraTransform.rotation.eulerAngles.z;
 
-        this.cameraRotation.x += -this.ySensitivity * this.viewInput.y * Time.deltaTime;
+        this.cameraRotation.x += -this.ySensitivity * this.viewInput.y;
         this.cameraRotation.x = Mathf.Clamp(this.cameraRotation.x, this.yViewClamp.x, this.yViewClamp.y);
 
         this.cameraTransform.localRotation = Quaternion.Euler(this.cameraRotation);
 
-        this.playerRotation.y += this.xSensitivity * this.viewInput.x * Time.deltaTime;
+        this.playerRotation.y += this.xSensitivity * this.viewInput.x;
         this.transform.rotation = Quaternion.Euler(this.playerRotation);
     }
 }

@@ -6140,6 +6140,9 @@ MonoBehaviour:
   deathParticles:
   - {fileID: 7684651594273902039}
   resetInterval: 3
+  deathCameraPosition: {x: 0, y: 4, z: -5}
+  deathCameraRotation: {x: 34.999996, y: 0, z: 0}
+  cameraZoomInterval: 1
 --- !u!114 &5657321301239029159
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6159,8 +6162,8 @@ MonoBehaviour:
   jumpHeight: 4
   jumpTimeAllowance: 0.2
   gravityValue: -9.81
-  xSensitivity: 30
-  ySensitivity: 30
+  xSensitivity: 10
+  ySensitivity: 8
   viewDeadzone: 2
   yViewClamp: {x: -60, y: 60}
   wallRunGravity: -7.5
