@@ -40,6 +40,7 @@ public class PlayerMovement : MonoBehaviour
     private float timeSinceJump;
     private float timeSinceGrounded;
     private float timeSinceOnWall;
+    private float timeSinceWallJump;
     private float currentWallJumpTime;
     private bool sprint;
     private Vector3 playerVelocity;
@@ -56,6 +57,7 @@ public class PlayerMovement : MonoBehaviour
         this.cameraRotation = this.cameraTransform.rotation.eulerAngles;
 
         this.ResetJumpTime();
+        this.timeSinceWallJump = this.jumpTimeAllowance + 1f;
     }
 
     private void Start()
@@ -132,6 +134,7 @@ public class PlayerMovement : MonoBehaviour
         TimedVariables.UpdateTimeVariable(ref timeSinceGrounded, jumpTimeAllowance);
         TimedVariables.UpdateTimeVariable(ref timeSinceJump, jumpTimeAllowance);
         TimedVariables.UpdateTimeVariable(ref timeSinceOnWall, jumpTimeAllowance);
+        TimedVariables.UpdateTimeVariable(ref timeSinceWallJump, jumpTimeAllowance);
         TimedVariables.UpdateTimeVariable(ref currentWallJumpTime, wallJumpTime);
     }
 
@@ -147,9 +150,9 @@ public class PlayerMovement : MonoBehaviour
             this.playerVelocity.y = 0f;
 
         // Check if wall running
-        var wallRunning = this.wallRunChecks.Any(c => c.HasHit);
+        var wallRunning = this.wallRunChecks.Any(c => c.HasHit) && this.timeSinceWallJump >= this.jumpTimeAllowance;
         var wallNormal = Vector3.zero;
-        if(wallRunning)
+        if (wallRunning)
         {
             wallNormal = this.GetWallNormal();
             this.timeSinceOnWall = 0f;
@@ -172,13 +175,14 @@ public class PlayerMovement : MonoBehaviour
                 this.ResetJumpTime();
             }
             // Set wall jump force if jumping
-            else if (this.timeSinceOnWall <= this.jumpTimeAllowance)
+            else if (wallRunning && this.timeSinceOnWall <= this.jumpTimeAllowance)
             {
                 this.wallJumpVelocity = wallNormal * this.wallJumpForce.x;
                 up = Mathf.Sqrt(Mathf.Abs(this.wallJumpForce.y * this.gravityValue));
 
                 wallRunning = false;
                 this.currentWallJumpTime = 0f;
+                this.timeSinceWallJump = 0f;
                 this.ResetJumpTime();
             }
         }
