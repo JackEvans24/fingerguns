@@ -86,7 +86,6 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
-        // TODO: Use Index
         PhotonNetwork.LoadLevel("Game");
     }
 }
