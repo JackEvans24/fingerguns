@@ -30,7 +30,9 @@ public class HitIndicator : MonoBehaviour
     {
         var angle = Vector3.SignedAngle(damagePosition - player.position, player.forward, player.up);
 
-        this.canvas.transform.rotation = Quaternion.Euler(0, 0, angle);
+        var rotation = this.canvas.transform.rotation.eulerAngles;
+        this.canvas.transform.rotation = Quaternion.Euler(rotation.x, rotation.y, angle);
+
         this.currentFadeTime = 0;
         this.canvas.alpha = 1;
     }
