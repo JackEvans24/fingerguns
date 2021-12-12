@@ -9,6 +9,7 @@ public class PlayerShooting : MonoBehaviour
     [SerializeField] private Camera mainCamera;
     [SerializeField] private Transform firePoint;
     [SerializeField] private Animator[] handAnimators;
+    [SerializeField] private SoundFromArray shootSound;
 
     [Header("Shooting variables")]
     [SerializeField] private float fireDistance = 200f;
@@ -84,6 +85,8 @@ public class PlayerShooting : MonoBehaviour
             return;
         this.timeSinceFire = 0f;
 
+        this.player.View.RPC(nameof(this.RPC_Fire), RpcTarget.All);
+
         this.handAnimators[this.currentHandIndex].SetTrigger("Fire");
         this.currentHandIndex++;
         if (this.currentHandIndex >= this.handAnimators.Length)
@@ -95,6 +98,12 @@ public class PlayerShooting : MonoBehaviour
         var health = hit.collider.GetComponent<HealthCollider>();
         if (health != null)
             health.TakeDamage(this.damage, this.transform);
+    }
+
+    [PunRPC]
+    private void RPC_Fire()
+    {
+        this.shootSound.Play();
     }
 
     private void Zoom(CallbackContext e)

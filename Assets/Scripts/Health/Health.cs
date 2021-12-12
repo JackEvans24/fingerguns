@@ -8,6 +8,7 @@ public class Health : MonoBehaviour
     [SerializeField] private HealthBar healthBar;
     [SerializeField] private ParticleSystem hurtParticles;
     [SerializeField] private HitIndicator indicator;
+    [SerializeField] private SoundFromArray hurtSound;
 
     [Header("Health Values")]
     public int MaxHealth;
@@ -38,6 +39,8 @@ public class Health : MonoBehaviour
     void RPC_TakeDamage(float damage, Vector3 damagedFrom)
     {
         this.hurtParticles.Play();
+
+        this.hurtSound.Play();
 
         if (!player.View.IsMine)
             return;
