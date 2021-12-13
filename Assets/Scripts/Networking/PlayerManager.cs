@@ -25,7 +25,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     {
         var spawnPoint = this.spawnPoints[Random.Range(0, spawnPoints.Length)];
         this.player = PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint.position, Quaternion.identity, data: new object[] { photonView.ViewID });
-
     }
 
     public void Die()
