@@ -1,4 +1,6 @@
 using Photon.Pun;
+using Photon.Realtime;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -8,8 +10,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
     [SerializeField] private CanvasGroup joinRoomGroup;
 
     [SerializeField] private TMP_InputField nameInput;
-    [SerializeField] private TMP_InputField createInput;
-    [SerializeField] private TMP_InputField joinInput;
+    [SerializeField] private TMP_InputField codeInput;
 
     [SerializeField] private TMP_Text errorText;
 
@@ -41,26 +42,26 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
     public void CreateRoom()
     {
-        if (string.IsNullOrWhiteSpace(this.createInput.text))
+        if (string.IsNullOrWhiteSpace(this.codeInput.text))
         {
             this.errorText.text = "Room code invalid";
             return;
         }
 
         this.SetName();
-        PhotonNetwork.CreateRoom(this.createInput.text);
+        PhotonNetwork.CreateRoom(this.codeInput.text);
     }
 
     public void JoinRoom()
     {
-        if (string.IsNullOrWhiteSpace(this.joinInput.text))
+        if (string.IsNullOrWhiteSpace(this.codeInput.text))
         {
             this.errorText.text = "Room code invalid";
             return;
         }
 
         this.SetName();
-        PhotonNetwork.JoinRoom(this.joinInput.text);
+        PhotonNetwork.JoinRoom(this.codeInput.text);
     }
 
     private void SetName()
@@ -87,5 +88,10 @@ public class RoomManager : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         PhotonNetwork.LoadLevel("Game");
+    }
+
+    public override void OnRoomListUpdate(List<RoomInfo> roomList)
+    {
+        base.OnRoomListUpdate(roomList);
     }
 }
