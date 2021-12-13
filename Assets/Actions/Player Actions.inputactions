@@ -219,6 +219,17 @@
                 },
                 {
                     "name": "",
+                    "id": "499a8e55-9cb4-434d-a78c-4b5d5b3de4aa",
+                    "path": "<Keyboard>/p",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KBM",
+                    "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "907a943a-61fb-483d-aa5d-cc1f1f7fb844",
                     "path": "<Gamepad>/start",
                     "interactions": "",
