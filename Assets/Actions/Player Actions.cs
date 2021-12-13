@@ -73,6 +73,14 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""Melee"",
+                    ""type"": ""Button"",
+                    ""id"": ""425f418d-7134-4a51-b2d5-c010d0a6ce92"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -317,6 +325,28 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                     ""action"": ""Zoom"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ed7cf1e3-fa34-49da-ad85-3de88bb12f4d"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KBM"",
+                    ""action"": ""Melee"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""bf29128d-c720-4c61-8c04-17ba1c39a34d"",
+                    ""path"": ""<Gamepad>/rightStickPress"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Melee"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -360,6 +390,7 @@ public class @PlayerActions : IInputActionCollection, IDisposable
         m_Movement_Pause = m_Movement.FindAction("Pause", throwIfNotFound: true);
         m_Movement_Fire = m_Movement.FindAction("Fire", throwIfNotFound: true);
         m_Movement_Zoom = m_Movement.FindAction("Zoom", throwIfNotFound: true);
+        m_Movement_Melee = m_Movement.FindAction("Melee", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -416,6 +447,7 @@ public class @PlayerActions : IInputActionCollection, IDisposable
     private readonly InputAction m_Movement_Pause;
     private readonly InputAction m_Movement_Fire;
     private readonly InputAction m_Movement_Zoom;
+    private readonly InputAction m_Movement_Melee;
     public struct MovementActions
     {
         private @PlayerActions m_Wrapper;
@@ -427,6 +459,7 @@ public class @PlayerActions : IInputActionCollection, IDisposable
         public InputAction @Pause => m_Wrapper.m_Movement_Pause;
         public InputAction @Fire => m_Wrapper.m_Movement_Fire;
         public InputAction @Zoom => m_Wrapper.m_Movement_Zoom;
+        public InputAction @Melee => m_Wrapper.m_Movement_Melee;
         public InputActionMap Get() { return m_Wrapper.m_Movement; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -457,6 +490,9 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                 @Zoom.started -= m_Wrapper.m_MovementActionsCallbackInterface.OnZoom;
                 @Zoom.performed -= m_Wrapper.m_MovementActionsCallbackInterface.OnZoom;
                 @Zoom.canceled -= m_Wrapper.m_MovementActionsCallbackInterface.OnZoom;
+                @Melee.started -= m_Wrapper.m_MovementActionsCallbackInterface.OnMelee;
+                @Melee.performed -= m_Wrapper.m_MovementActionsCallbackInterface.OnMelee;
+                @Melee.canceled -= m_Wrapper.m_MovementActionsCallbackInterface.OnMelee;
             }
             m_Wrapper.m_MovementActionsCallbackInterface = instance;
             if (instance != null)
@@ -482,6 +518,9 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                 @Zoom.started += instance.OnZoom;
                 @Zoom.performed += instance.OnZoom;
                 @Zoom.canceled += instance.OnZoom;
+                @Melee.started += instance.OnMelee;
+                @Melee.performed += instance.OnMelee;
+                @Melee.canceled += instance.OnMelee;
             }
         }
     }
@@ -513,5 +552,6 @@ public class @PlayerActions : IInputActionCollection, IDisposable
         void OnPause(InputAction.CallbackContext context);
         void OnFire(InputAction.CallbackContext context);
         void OnZoom(InputAction.CallbackContext context);
+        void OnMelee(InputAction.CallbackContext context);
     }
 }

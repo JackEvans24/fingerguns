@@ -1,4 +1,6 @@
+using DG.Tweening;
 using Photon.Pun;
+using System.Collections;
 using UnityEngine;
 using static UnityEngine.InputSystem.InputAction;
 
@@ -10,6 +12,11 @@ public class PlayerShooting : MonoBehaviour
     [SerializeField] private Transform firePoint;
     [SerializeField] private Animator[] handAnimators;
     [SerializeField] private SoundFromArray shootSound;
+    [SerializeField] private SkinnedMeshRenderer[] hands;
+    [SerializeField] private Transform slapHandTransform;
+    [SerializeField] private SkinnedMeshRenderer slapHand;
+    [SerializeField] private Collider slapCollider;
+    [SerializeField] private SoundFromArray whooshSound;
 
     [Header("Shooting variables")]
     [SerializeField] private float fireDistance = 200f;
@@ -21,19 +28,34 @@ public class PlayerShooting : MonoBehaviour
     [SerializeField] private float zoomedFOV;
     [SerializeField] private float zoomSmoothing;
 
+    [Header("Melee variables")]
+    [SerializeField] private float meleeDuration = 0.5f;
+    [SerializeField] private float meleeRotation = -90f;
+    [SerializeField] private float meleeHeightGain = 0.1f;
+    [SerializeField] private float meleeRecovery = 1.5f;
+    [SerializeField] private Ease meleeEase = Ease.InOutSine;
+
+
     private PlayerController player;
 
     private float timeSinceFire;
+    private float timeSinceMelee;
     private float targetFov;
     private float currentZoomSmoothVelocity;
     private int currentHandIndex;
+    private Vector3 initialSlapPosition, initialSlapRotation;
 
     private void Awake()
     {
         this.player = GetComponent<PlayerController>();
 
         this.timeSinceFire = this.fireRate + 1f;
+        this.timeSinceMelee = this.meleeRecovery + 1f;
+
         this.targetFov = this.unzoomedFOV;
+
+        this.initialSlapPosition = this.slapHandTransform.localPosition;
+        this.initialSlapRotation = this.slapHandTransform.localRotation.eulerAngles;
     }
 
     private void Start()
@@ -50,6 +72,8 @@ public class PlayerShooting : MonoBehaviour
 
         input.Movement.Fire.started += this.Fire;
 
+        input.Movement.Melee.started += this.Melee;
+
         input.Movement.Zoom.performed += this.Zoom;
         input.Movement.Zoom.canceled += this.Zoom;
 
@@ -62,6 +86,8 @@ public class PlayerShooting : MonoBehaviour
 
         input.Movement.Fire.started -= this.Fire;
 
+        input.Movement.Melee.started -= this.Melee;
+
         input.Movement.Zoom.performed -= this.Zoom;
         input.Movement.Zoom.canceled -= this.Zoom;
     }
@@ -72,6 +98,7 @@ public class PlayerShooting : MonoBehaviour
             return;
 
         TimedVariables.UpdateTimeVariable(ref this.timeSinceFire, this.fireRate);
+        TimedVariables.UpdateTimeVariable(ref this.timeSinceMelee, this.meleeRecovery);
 
         this.mainCamera.fieldOfView = Mathf.SmoothDamp(this.mainCamera.fieldOfView, targetFov, ref this.currentZoomSmoothVelocity, this.zoomSmoothing);
     }
@@ -81,7 +108,7 @@ public class PlayerShooting : MonoBehaviour
         if (Pause.Paused || this.player.Health.Dead)
             return;
 
-        if (this.timeSinceFire < this.fireRate)
+        if (this.timeSinceFire < this.fireRate || this.timeSinceMelee < this.meleeRecovery)
             return;
         this.timeSinceFire = 0f;
 
@@ -104,6 +131,47 @@ public class PlayerShooting : MonoBehaviour
     private void RPC_Fire()
     {
         this.shootSound.Play();
+    }
+
+    private void Melee(CallbackContext e)
+    {
+        if (Pause.Paused || this.player.Health.Dead)
+            return;
+
+        if (this.timeSinceMelee < this.meleeRecovery)
+            return;
+        this.timeSinceMelee = 0f;
+
+        this.player.View.RPC(nameof(this.RPC_Melee), RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_Melee()
+    {
+        StartCoroutine(Melee_Coroutine());
+    }
+
+    private IEnumerator Melee_Coroutine()
+    {
+        this.slapHandTransform.localPosition = this.initialSlapPosition;
+        this.slapHandTransform.localRotation = Quaternion.Euler(this.initialSlapRotation);
+
+        foreach (var hand in this.hands)
+            hand.enabled = false;
+        this.slapHand.enabled = true;
+        this.slapCollider.enabled = true;
+
+        this.slapHandTransform.DOLocalMoveY(this.slapHandTransform.localPosition.y + this.meleeHeightGain, this.meleeDuration);
+        this.slapHandTransform.DOLocalRotate(this.initialSlapRotation + (Vector3.up * this.meleeRotation), this.meleeDuration);
+
+        this.whooshSound.Play();
+
+        yield return new WaitForSeconds(this.meleeDuration);
+
+        this.slapCollider.enabled = false;
+        this.slapHand.enabled = false;
+        foreach (var hand in this.hands)
+            hand.enabled = true;
     }
 
     private void Zoom(CallbackContext e)

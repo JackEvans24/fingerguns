@@ -93,6 +93,9 @@ public class PlayerController : MonoBehaviour
     [PunRPC]
     private void RPC_Die()
     {
+        foreach (var col in this.GetComponents<Collider>())
+            col.enabled = false;
+
         foreach (var collider in this.colliders)
             collider.enabled = false;
 
