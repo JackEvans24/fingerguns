@@ -25,6 +25,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private MeshRenderer body;
     [SerializeField] private SkinnedMeshRenderer[] hands;
     [SerializeField] private Collider[] colliders;
+    [SerializeField] private CanvasGroup nameText;
 
     [Header("Pause")]
     [SerializeField] private CanvasGroup pauseCanvas;
@@ -35,6 +36,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Vector3 deathCameraPosition;
     [SerializeField] private Vector3 deathCameraRotation;
     [SerializeField] private float cameraZoomInterval;
+
+    private Vector3 initialCameraPosition, initialCameraRotation;
 
     public event EventHandler OnRemoveInputs;
 
@@ -57,6 +60,22 @@ public class PlayerController : MonoBehaviour
 
             input.Movement.Pause.started += this.TogglePause_Event;
             this.input.Enable();
+
+            var customProps = this.view.Owner.CustomProperties;
+            if (!customProps.ContainsKey("Kills"))
+            {
+                customProps.Add("Kills", 0);
+                customProps.Add("Deaths", 0);
+            }
+            else
+            {
+                customProps["Kills"] = 0;
+                customProps["Deaths"] = 0;
+            }
+            this.view.Owner.SetCustomProperties(customProps);
+
+            this.initialCameraPosition = this.cam.transform.localPosition;
+            this.initialCameraRotation = this.cam.transform.localRotation.eulerAngles;
         }
     }
 
@@ -103,6 +122,8 @@ public class PlayerController : MonoBehaviour
         foreach (var hand in hands)
             hand.enabled = false;
 
+        this.nameText.alpha = 0;
+
         foreach (var particles in this.deathParticles)
             particles.Play();
 
@@ -114,6 +135,38 @@ public class PlayerController : MonoBehaviour
     {
         yield return new WaitForSeconds(this.resetInterval);
 
-        playerManager.Die();
+        this.transform.position = this.playerManager.GetSpawnPoint().position;
+
+        view.RPC(nameof(this.RPC_Reset), RpcTarget.All);
+
+        input.Enable();
+    }
+
+    [PunRPC]
+    private void RPC_Reset()
+    {
+        this.health.ResetHealth();
+
+        foreach (var col in this.GetComponents<Collider>())
+            col.enabled = true;
+
+        foreach (var collider in this.colliders)
+            collider.enabled = true;
+
+        this.cam.transform.localPosition = this.initialCameraPosition;
+        this.cam.transform.localRotation = Quaternion.Euler(this.initialCameraRotation);
+
+        StartCoroutine(this.Reset_Coroutine());
+    }
+
+    private IEnumerator Reset_Coroutine()
+    {
+        yield return new WaitForSeconds(0.2f);
+
+        body.enabled = true;
+        foreach (var hand in hands)
+            hand.enabled = true;
+
+        this.nameText.alpha = 1;
     }
 }

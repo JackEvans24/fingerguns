@@ -5,8 +5,15 @@ public class HealthCollider : MonoBehaviour
     [SerializeField] private Health health;
     [SerializeField] private float damageMultiplier;
 
-    public void TakeDamage(float damage, Transform damagedBy)
+    public bool Dead { get => this.health.Dead; }
+
+    public bool TryKill(float damage, Transform damagedBy)
     {
-        this.health.TakeDamage(damage * this.damageMultiplier, damagedBy);
+        var totalDamage = damage * this.damageMultiplier;
+        var killed = health.CurrentHealth - totalDamage <= 0;
+
+        this.health.TakeDamage(totalDamage, damagedBy);
+
+        return killed;
     }
 }

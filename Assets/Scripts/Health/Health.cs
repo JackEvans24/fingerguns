@@ -23,10 +23,11 @@ public class Health : MonoBehaviour
 
     public void ResetHealth()
     {
+        this.CurrentHealth = this.MaxHealth;
+
         if (!player.View.IsMine)
             return;
 
-        this.CurrentHealth = this.MaxHealth;
         this.healthBar.ResetHealth(this); 
     }
 
@@ -38,18 +39,20 @@ public class Health : MonoBehaviour
     [PunRPC]
     void RPC_TakeDamage(float damage, Vector3 damagedFrom)
     {
+        if (this.CurrentHealth <= 0)
+            return;
+
         this.hurtParticles.Play();
 
         this.hurtSound.Play();
 
+        this.CurrentHealth = Mathf.Max(0, (int)Mathf.Ceil(this.CurrentHealth - damage));
+
         if (!player.View.IsMine)
-            return;
-        if (this.CurrentHealth <= 0)
             return;
 
         this.indicator.ShowHitFrom(damagedFrom);
 
-        this.CurrentHealth = Mathf.Max(0, (int)Mathf.Ceil(this.CurrentHealth - damage));
         this.healthBar.UpdateHealth(this);
 
         if (this.CurrentHealth <= 0)
@@ -60,6 +63,15 @@ public class Health : MonoBehaviour
     {
         if (this.player == null)
             return;
+
+        var properties = this.player.View.Owner.CustomProperties;
+
+        if (properties.TryGetValue("Deaths", out object storedDeaths))
+            properties["Deaths"] = (int)storedDeaths + 1;
+        else
+            properties.Add("Deaths", 1);
+
+        this.player.View.Owner.SetCustomProperties(properties);
 
         this.player.Die();
     }

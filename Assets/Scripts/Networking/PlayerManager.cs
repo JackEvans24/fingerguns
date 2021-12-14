@@ -23,14 +23,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     private void CreatePlayer()
     {
-        var spawnPoint = this.spawnPoints[Random.Range(0, spawnPoints.Length)];
+        var spawnPoint = this.GetSpawnPoint();
         this.player = PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint.position, Quaternion.identity, data: new object[] { photonView.ViewID });
-    }
-
-    public void Die()
-    {
-        PhotonNetwork.Destroy(this.player);
-        this.CreatePlayer();
     }
 
     public void Leave()
@@ -43,4 +37,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     {
         PhotonNetwork.LoadLevel("Lobby");
     }
+
+    public Transform GetSpawnPoint() => this.spawnPoints[Random.Range(0, this.spawnPoints.Length)];
 }

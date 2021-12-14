@@ -123,14 +123,29 @@ public class PlayerShooting : MonoBehaviour
             return;
 
         var health = hit.collider.GetComponent<HealthCollider>();
-        if (health != null)
-            health.TakeDamage(this.damage, this.transform);
+        if (health == null)
+            return;
+        
+        if (health.TryKill(this.damage, this.transform))
+            this.AddKill();
     }
 
     [PunRPC]
     private void RPC_Fire()
     {
         this.shootSound.Play();
+    }
+
+    private void AddKill()
+    {
+        var properties = player.View.Owner.CustomProperties;
+
+        if (properties.TryGetValue("Kills", out object storedKills))
+            properties["Kills"] = (int)storedKills + 1;
+        else
+            properties.Add("Kills", 1);
+
+        player.View.Owner.SetCustomProperties(properties);
     }
 
     private void Melee(CallbackContext e)
@@ -161,8 +176,8 @@ public class PlayerShooting : MonoBehaviour
         this.slapHand.enabled = true;
         this.slapCollider.enabled = true;
 
-        this.slapHandTransform.DOLocalMoveY(this.slapHandTransform.localPosition.y + this.meleeHeightGain, this.meleeDuration);
-        this.slapHandTransform.DOLocalRotate(this.initialSlapRotation + (Vector3.up * this.meleeRotation), this.meleeDuration);
+        this.slapHandTransform.DOLocalMoveY(this.slapHandTransform.localPosition.y + this.meleeHeightGain, this.meleeDuration).SetEase(this.meleeEase);
+        this.slapHandTransform.DOLocalRotate(this.initialSlapRotation + (Vector3.up * this.meleeRotation), this.meleeDuration).SetEase(this.meleeEase);
 
         this.whooshSound.Play();
 
