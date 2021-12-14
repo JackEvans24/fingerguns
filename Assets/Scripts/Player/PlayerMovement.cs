@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -19,6 +20,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float jumpHeight = 3.0f;
     [SerializeField] private float jumpTimeAllowance = 0.2f;
     [SerializeField] private float gravityValue = -9.81f;
+    [SerializeField] private SoundFromArray jumpSound;
 
     [Header("View Variables")]
     [SerializeField] private float viewDeadzone = 2f;
@@ -195,7 +197,10 @@ public class PlayerMovement : MonoBehaviour
 
         // Set vertical if jumping
         if (up > 0f)
+        {
             this.playerVelocity.y = up;
+            this.player.View.RPC(nameof(this.RPC_Jump), RpcTarget.All);
+        }
 
         // Add gravity
         var gravity = wallRunning ? this.wallRunGravity : this.gravityValue;
@@ -203,6 +208,12 @@ public class PlayerMovement : MonoBehaviour
 
         // Move
         this.controller.Move(this.playerVelocity * Time.deltaTime);
+    }
+
+    [PunRPC]
+    private void RPC_Jump()
+    {
+        this.jumpSound.Play();
     }
 
     private Vector3 GetWallNormal()

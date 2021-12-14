@@ -42,6 +42,7 @@ MonoBehaviour:
   - RPC_Melee
   - RPC_Slap
   - RPC_Reset
+  - RPC_Jump
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1
