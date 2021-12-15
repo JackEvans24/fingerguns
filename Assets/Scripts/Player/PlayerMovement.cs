@@ -8,9 +8,6 @@ using static UnityEngine.InputSystem.InputAction;
 [RequireComponent(typeof(PlayerController))]
 public class PlayerMovement : MonoBehaviour
 {
-    [Header("References")]
-    [SerializeField] private Transform cameraTransform;
-
     [Header("Movement Variables")]
     [SerializeField] private float playerSpeed = 6.0f;
     [SerializeField] private float sprintSpeed = 8.0f;
@@ -22,10 +19,6 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float gravityValue = -9.81f;
     [SerializeField] private SoundFromArray jumpSound;
 
-    [Header("View Variables")]
-    [SerializeField] private float viewDeadzone = 2f;
-    [SerializeField] private Vector2 yViewClamp;
-
     [Header("Wall run")]
     [SerializeField] private float wallRunGravity = 4.9f;
     [SerializeField] private Raycaster[] wallRunChecks;
@@ -36,9 +29,7 @@ public class PlayerMovement : MonoBehaviour
     private CharacterController controller;
     private PlayerController player;
 
-    private int sensitivity;
     private Vector2 moveInput;
-    private Vector2 viewInput;
     private float timeSinceJump;
     private float timeSinceGrounded;
     private float timeSinceOnWall;
@@ -46,17 +37,12 @@ public class PlayerMovement : MonoBehaviour
     private float currentWallJumpTime;
     private bool sprint;
     private Vector3 playerVelocity;
-    private Vector3 playerRotation;
-    private Vector3 cameraRotation;
     private Vector3 wallJumpVelocity;
 
     private void Awake()
     {
         this.controller = GetComponent<CharacterController>();
         this.player = GetComponent<PlayerController>();
-
-        this.playerRotation = this.transform.rotation.eulerAngles;
-        this.cameraRotation = this.cameraTransform.rotation.eulerAngles;
 
         this.ResetJumpTime();
         this.timeSinceWallJump = this.jumpTimeAllowance + 1f;
@@ -68,50 +54,35 @@ public class PlayerMovement : MonoBehaviour
             return;
 
         this.SetEvents();
-        this.UpdateSettings(this, null);
-    }
-
-    private void SetEvents()
-    {
-        SettingsManager.OnSettingsChanged += this.UpdateSettings;
-
-        var input = player.Input;
-
-        input.Movement.Move.performed += this.SetMovementInput;
-        input.Movement.Move.canceled += this.SetMovementInput;
-        input.Movement.View.performed += this.SetViewInput;
-        input.Movement.View.canceled += this.SetViewInput;
-
-        input.Movement.Jump.started += this.SetJumpInput;
-        input.Movement.Sprint.started += this.SetSprintInput;
 
         this.player.OnRemoveInputs += (_s, _e) => this.RemoveEvents();
     }
 
+    private void SetEvents()
+    {
+        var input = player.Input;
+
+        input.Movement.Move.performed += this.SetMovementInput;
+        input.Movement.Move.canceled += this.SetMovementInput;
+
+        input.Movement.Jump.started += this.SetJumpInput;
+        input.Movement.Sprint.started += this.SetSprintInput;
+    }
+
     private void RemoveEvents()
     {
-        SettingsManager.OnSettingsChanged -= this.UpdateSettings;
-
         var input = player.Input;
 
         input.Movement.Move.performed -= this.SetMovementInput;
         input.Movement.Move.canceled -= this.SetMovementInput;
-        input.Movement.View.performed -= this.SetViewInput;
-        input.Movement.View.canceled -= this.SetViewInput;
 
         input.Movement.Jump.started -= this.SetJumpInput;
         input.Movement.Sprint.started -= this.SetSprintInput;
     }
 
     private void SetMovementInput(CallbackContext e) => this.moveInput = e.ReadValue<Vector2>();
-    private void SetViewInput(CallbackContext e) => this.viewInput = e.ReadValue<Vector2>() * 0.01f;
     private void SetJumpInput(CallbackContext e) => this.timeSinceJump = 0f;
     private void SetSprintInput(CallbackContext e) => this.sprint = !this.sprint;
-
-    private void UpdateSettings(object sender, System.EventArgs e)
-    {
-        this.sensitivity = SettingsManager.Sensitivity;
-    }
 
     private void Update()
     {
@@ -121,14 +92,12 @@ public class PlayerMovement : MonoBehaviour
         if (Pause.Paused || this.player.Health.Dead)
         {
             this.moveInput = Vector2.zero;
-            this.viewInput = Vector2.zero;
             this.ResetJumpTime();
         }
 
         this.UpdateTimeVariables();
 
         this.SetMovement();
-        this.SetView();
     }
 
     private void UpdateTimeVariables()
@@ -242,16 +211,4 @@ public class PlayerMovement : MonoBehaviour
         this.timeSinceOnWall = this.jumpTimeAllowance + 1f;
     }
 
-    private void SetView()
-    {
-        this.cameraRotation.z = this.cameraTransform.rotation.eulerAngles.z;
-
-        this.cameraRotation.x += -this.sensitivity * this.viewInput.y;
-        this.cameraRotation.x = Mathf.Clamp(this.cameraRotation.x, this.yViewClamp.x, this.yViewClamp.y);
-
-        this.cameraTransform.localRotation = Quaternion.Euler(this.cameraRotation);
-
-        this.playerRotation.y += this.sensitivity * this.viewInput.x;
-        this.transform.rotation = Quaternion.Euler(this.playerRotation);
-    }
 }

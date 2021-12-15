@@ -8138,7 +8138,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc803ab92e9d963489ec3da8ccd6a34a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraTransform: {fileID: 5657321301373860604}
   playerSpeed: 5
   sprintSpeed: 8
   sprintDeadzone: 0.8
@@ -8146,8 +8145,6 @@ MonoBehaviour:
   jumpTimeAllowance: 0.2
   gravityValue: -9.81
   jumpSound: {fileID: 8413881060427384934}
-  viewDeadzone: 2
-  yViewClamp: {x: -60, y: 60}
   wallRunGravity: -7.5
   wallRunChecks:
   - {fileID: 5657321300316057783}
@@ -8239,6 +8236,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainCamera: {fileID: 1883428961231521562}
+  cameraTransform: {fileID: 5657321301373860604}
   firePoint: {fileID: 5657321299806313443}
   handAnimators:
   - {fileID: 5657321300465340892}
@@ -8251,6 +8249,8 @@ MonoBehaviour:
   slapHand: {fileID: 8589135471071159118}
   slapCollider: {fileID: 3588158984803581184}
   whooshSound: {fileID: 1475623457009697796}
+  yViewClamp: {x: -60, y: 60}
+  zoomedSensitivityModifier: 0.5
   fireDistance: 200
   fireRate: 0.2
   damage: 10

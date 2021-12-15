@@ -39,6 +39,7 @@ public class PlayerController : MonoBehaviour
 
     private Vector3 initialCameraPosition, initialCameraRotation;
 
+    public event EventHandler OnDie;
     public event EventHandler OnRemoveInputs;
 
     private void Awake()
@@ -102,7 +103,7 @@ public class PlayerController : MonoBehaviour
 
     public void Die()
     {
-        input.Disable();
+        this.OnDie?.Invoke(this, null);
 
         view.RPC(nameof(this.RPC_Die), RpcTarget.All);
 
@@ -138,8 +139,6 @@ public class PlayerController : MonoBehaviour
         this.transform.position = this.playerManager.GetSpawnPoint().position;
 
         view.RPC(nameof(this.RPC_Reset), RpcTarget.All);
-
-        input.Enable();
     }
 
     [PunRPC]

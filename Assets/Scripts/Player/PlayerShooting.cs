@@ -9,6 +9,7 @@ public class PlayerShooting : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private Camera mainCamera;
+    [SerializeField] private Transform cameraTransform;
     [SerializeField] private Transform firePoint;
     [SerializeField] private Animator[] handAnimators;
     [SerializeField] private SoundFromArray shootSound;
@@ -18,15 +19,19 @@ public class PlayerShooting : MonoBehaviour
     [SerializeField] private Collider slapCollider;
     [SerializeField] private SoundFromArray whooshSound;
 
+    [Header("View Variables")]
+    [SerializeField] private Vector2 yViewClamp;
+    [SerializeField] private float zoomedSensitivityModifier = 0.6f;
+
     [Header("Shooting variables")]
     [SerializeField] private float fireDistance = 200f;
     [SerializeField] private float fireRate = 0.2f;
     [SerializeField] private float damage = 10;
 
     [Header("Zoom varibles")]
-    [SerializeField] private float unzoomedFOV;
-    [SerializeField] private float zoomedFOV;
-    [SerializeField] private float zoomSmoothing;
+    [SerializeField] private float unzoomedFOV = 60;
+    [SerializeField] private float zoomedFOV = 30;
+    [SerializeField] private float zoomSmoothing = 0.1f;
 
     [Header("Melee variables")]
     [SerializeField] private float meleeDuration = 0.5f;
@@ -38,9 +43,13 @@ public class PlayerShooting : MonoBehaviour
 
     private PlayerController player;
 
+    private Vector3 playerRotation;
+    private Vector3 cameraRotation;
+    private Vector2 viewInput;
+    private int sensitivity;
     private float timeSinceFire;
     private float timeSinceMelee;
-    private float targetFov;
+    private bool zoomed;
     private float currentZoomSmoothVelocity;
     private int currentHandIndex;
     private Vector3 initialSlapPosition, initialSlapRotation;
@@ -49,10 +58,11 @@ public class PlayerShooting : MonoBehaviour
     {
         this.player = GetComponent<PlayerController>();
 
+        this.playerRotation = this.transform.rotation.eulerAngles;
+        this.cameraRotation = this.cameraTransform.rotation.eulerAngles;
+
         this.timeSinceFire = this.fireRate + 1f;
         this.timeSinceMelee = this.meleeRecovery + 1f;
-
-        this.targetFov = this.unzoomedFOV;
 
         this.initialSlapPosition = this.slapHandTransform.localPosition;
         this.initialSlapRotation = this.slapHandTransform.localRotation.eulerAngles;
@@ -64,11 +74,21 @@ public class PlayerShooting : MonoBehaviour
             return;
 
         this.SetInputEvents();
+
+        this.player.OnRemoveInputs += (_s, _e) => this.RemoveInputEvents();
+        this.player.OnDie += (_s, _e) => this.HandleDeath();
+
+        this.UpdateSettings(this, null);
     }
 
     private void SetInputEvents()
     {
+        SettingsManager.OnSettingsChanged += this.UpdateSettings;
+
         var input = player.Input;
+
+        input.Movement.View.performed += this.SetViewInput;
+        input.Movement.View.canceled += this.SetViewInput;
 
         input.Movement.Fire.started += this.Fire;
 
@@ -76,13 +96,16 @@ public class PlayerShooting : MonoBehaviour
 
         input.Movement.Zoom.performed += this.Zoom;
         input.Movement.Zoom.canceled += this.Zoom;
-
-        this.player.OnRemoveInputs += (_s, _e) => this.RemoveInputEvents();
     }
 
     private void RemoveInputEvents()
     {
+        SettingsManager.OnSettingsChanged -= this.UpdateSettings;
+
         var input = player.Input;
+
+        input.Movement.View.performed -= this.SetViewInput;
+        input.Movement.View.canceled -= this.SetViewInput;
 
         input.Movement.Fire.started -= this.Fire;
 
@@ -92,15 +115,48 @@ public class PlayerShooting : MonoBehaviour
         input.Movement.Zoom.canceled -= this.Zoom;
     }
 
+    private void HandleDeath()
+    {
+        this.zoomed = false;
+    }
+
+    private void UpdateSettings(object sender, System.EventArgs e)
+    {
+        this.sensitivity = SettingsManager.Sensitivity;
+    }
+
+    private void SetViewInput(CallbackContext e) => this.viewInput = e.ReadValue<Vector2>() * 0.01f;
+
     private void Update()
     {
-        if (!player.View.IsMine || this.player.Health.Dead)
+        if (!player.View.IsMine)
             return;
+
+        if (this.player.Health.Dead || Pause.Paused)
+            this.viewInput = Vector2.zero;
+
+        this.SetView();
 
         TimedVariables.UpdateTimeVariable(ref this.timeSinceFire, this.fireRate);
         TimedVariables.UpdateTimeVariable(ref this.timeSinceMelee, this.meleeRecovery);
 
+        var targetFov = this.zoomed ? this.zoomedFOV : this.unzoomedFOV;
         this.mainCamera.fieldOfView = Mathf.SmoothDamp(this.mainCamera.fieldOfView, targetFov, ref this.currentZoomSmoothVelocity, this.zoomSmoothing);
+    }
+
+    private void SetView()
+    {
+        this.cameraRotation.z = this.cameraTransform.rotation.eulerAngles.z;
+
+        var totalSensitivity = this.sensitivity * (this.zoomed ? this.zoomedSensitivityModifier : 1);
+
+        this.cameraRotation.x += -totalSensitivity * this.viewInput.y;
+        this.cameraRotation.x = Mathf.Clamp(this.cameraRotation.x, this.yViewClamp.x, this.yViewClamp.y);
+
+        this.cameraTransform.localRotation = Quaternion.Euler(this.cameraRotation);
+
+        this.playerRotation.y += totalSensitivity * this.viewInput.x;
+        this.transform.rotation = Quaternion.Euler(this.playerRotation);
     }
 
     private void Fire(CallbackContext e)
@@ -192,8 +248,8 @@ public class PlayerShooting : MonoBehaviour
     private void Zoom(CallbackContext e)
     {
         if (Pause.Paused || this.player.Health.Dead)
-            return;
-
-        this.targetFov = e.ReadValueAsButton() ? this.zoomedFOV : this.unzoomedFOV;
+            this.zoomed = false;
+        else
+            this.zoomed = e.ReadValueAsButton();
     }
 }
