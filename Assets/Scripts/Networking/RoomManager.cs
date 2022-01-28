@@ -1,19 +1,22 @@
 using Photon.Pun;
-using Photon.Realtime;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 public class RoomManager : MonoBehaviourPunCallbacks
 {
+    [Header("Canvas Groups")]
     [SerializeField] private CanvasGroup loadingGroup;
     [SerializeField] private CanvasGroup joinRoomGroup;
     [SerializeField] private CanvasGroup regionGroup;
+    [SerializeField] private CanvasGroup findRoomGroup;
 
+    [Header("Menus")]
+    [SerializeField] private RoomBrowser roomBrowser;
+
+    [Header("Main Menu Inputs")]
     [SerializeField] private TMP_InputField nameInput;
     [SerializeField] private TMP_InputField codeInput;
 
-    [SerializeField] private TMP_Text regionText;
     [SerializeField] private TMP_Text errorText;
 
     private bool changingRegion;
@@ -30,16 +33,12 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
     public override void OnJoinedLobby()
     {
-        this.HideAllUI();
-
-        this.joinRoomGroup.alpha = 1;
-        this.joinRoomGroup.blocksRaycasts = true;
-        this.joinRoomGroup.interactable = true;
+        this.ShowMainMenu();
     }
 
     public override void OnLeftLobby()
     {
-        if (changingRegion)
+        if (this.changingRegion)
             return;
 
         this.HideAllUI();
@@ -73,6 +72,26 @@ public class RoomManager : MonoBehaviourPunCallbacks
         PhotonNetwork.JoinRoom(this.codeInput.text);
     }
 
+    public void FindRoom()
+    {
+        this.SetName();
+
+        this.HideAllUI();
+
+        this.findRoomGroup.alpha = 1;
+        this.findRoomGroup.blocksRaycasts = true;
+        this.findRoomGroup.interactable = true;
+    }
+
+    public void ShowMainMenu()
+    {
+        this.HideAllUI();
+
+        this.joinRoomGroup.alpha = 1;
+        this.joinRoomGroup.blocksRaycasts = true;
+        this.joinRoomGroup.interactable = true;
+    }
+
     private void SetName()
     {
         var name = this.nameInput.text;
@@ -100,11 +119,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
         this.changingRegion = false;
 
-        this.HideAllUI();
-
-        this.joinRoomGroup.alpha = 1;
-        this.joinRoomGroup.blocksRaycasts = true;
-        this.joinRoomGroup.interactable = true;
+        this.ShowMainMenu();
     }
 
     private void HideAllUI()
@@ -118,6 +133,10 @@ public class RoomManager : MonoBehaviourPunCallbacks
         this.regionGroup.interactable = false;
         this.regionGroup.blocksRaycasts = false;
         this.regionGroup.alpha = 0;
+
+        this.findRoomGroup.interactable = false;
+        this.findRoomGroup.blocksRaycasts = false;
+        this.findRoomGroup.alpha = 0;
     }
 
     public override void OnCreateRoomFailed(short returnCode, string message)
@@ -135,10 +154,5 @@ public class RoomManager : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         PhotonNetwork.LoadLevel("Game");
-    }
-
-    public override void OnRoomListUpdate(List<RoomInfo> roomList)
-    {
-        base.OnRoomListUpdate(roomList);
     }
 }
