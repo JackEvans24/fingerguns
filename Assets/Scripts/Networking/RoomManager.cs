@@ -8,11 +8,15 @@ public class RoomManager : MonoBehaviourPunCallbacks
 {
     [SerializeField] private CanvasGroup loadingGroup;
     [SerializeField] private CanvasGroup joinRoomGroup;
+    [SerializeField] private CanvasGroup regionGroup;
 
     [SerializeField] private TMP_InputField nameInput;
     [SerializeField] private TMP_InputField codeInput;
 
+    [SerializeField] private TMP_Text regionText;
     [SerializeField] private TMP_Text errorText;
+
+    private bool changingRegion;
 
     private void Start()
     {
@@ -26,15 +30,20 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
     public override void OnJoinedLobby()
     {
-        this.loadingGroup.alpha = 0;
+        this.HideAllUI();
+
         this.joinRoomGroup.alpha = 1;
+        this.joinRoomGroup.blocksRaycasts = true;
         this.joinRoomGroup.interactable = true;
     }
 
     public override void OnLeftLobby()
     {
-        this.joinRoomGroup.interactable = false;
-        this.joinRoomGroup.alpha = 0;
+        if (changingRegion)
+            return;
+
+        this.HideAllUI();
+
         this.loadingGroup.alpha = 1;
 
         PhotonNetwork.JoinLobby();
@@ -71,6 +80,44 @@ public class RoomManager : MonoBehaviourPunCallbacks
             name = "Player";
 
         PhotonNetwork.NickName = name;
+    }
+
+    public void OpenRegionMenu()
+    {
+        this.changingRegion = true;
+
+        this.HideAllUI();
+
+        this.regionGroup.alpha = 1;
+        this.regionGroup.blocksRaycasts = true;
+        this.regionGroup.interactable = true;
+    }
+
+    public void CloseRegionMenu()
+    {
+        if (!this.changingRegion)
+            return;
+
+        this.changingRegion = false;
+
+        this.HideAllUI();
+
+        this.joinRoomGroup.alpha = 1;
+        this.joinRoomGroup.blocksRaycasts = true;
+        this.joinRoomGroup.interactable = true;
+    }
+
+    private void HideAllUI()
+    {
+        this.loadingGroup.alpha = 0;
+
+        this.joinRoomGroup.interactable = false;
+        this.joinRoomGroup.blocksRaycasts = false;
+        this.joinRoomGroup.alpha = 0;
+
+        this.regionGroup.interactable = false;
+        this.regionGroup.blocksRaycasts = false;
+        this.regionGroup.alpha = 0;
     }
 
     public override void OnCreateRoomFailed(short returnCode, string message)
