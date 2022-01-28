@@ -60,7 +60,6 @@ public class RoomBrowser : MonoBehaviourPunCallbacks
             return;
         }
 
-
         for (int i = 0; i <= selectedRooms.Count; i++)
         {
             var button = this.roomListContainer.GetChild(i).GetComponent<JoinRoomButton>();
